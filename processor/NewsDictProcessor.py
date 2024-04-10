@@ -4,6 +4,7 @@ import os
 
 import numpy as np
 import torch
+import yaml
 from scraper.WebScraper import WebScraper
 from utils.FileUtils import FileUtils
 import logging
@@ -15,20 +16,20 @@ logger = logging.getLogger(__name__)
 
 
 class NewsDictProcessor:
-    def __init__(self, dict_path, domain=None):
+    def __init__(self, dict_path, domain=None, config_path='config/config.yaml'):
         self.dict_path = dict_path
+        self.load_config(config_path)
         self.csv_path = FileUtils.remove_file_extension(dict_path) + '.csv'
         self.embedding_csv_path = FileUtils.remove_file_extension(dict_path) + '_embedding.csv'
         self.news_content_save_path = FileUtils.remove_file_extension(dict_path) + '_content.csv'
         self.web_scraper = WebScraper(domain)
 
-        self.xpath = []
-        # [
-        #     '//*[@class="main-title"]',
-        #     '//*[@id="main_title"]',
-        #     '//*[@id="artibody"]',
-        #     '//*[@id="artibodyTitle"]'
-        # ]
+    def load_config(self, config_path):
+        with open(config_path, 'r', encoding='utf-8') as file:
+            config = yaml.safe_load(file)
+        self.xpath_dict = config['news']['xpath_dict']
+        self.scrap_img = config['news']['scrap_img']
+        self.img_stop_keywords = config['news']['img_stop_keywords']
     def dict_to_csv(self):
         """将新闻字典转换为CSV文件"""
         if FileUtils.file_exists(self.csv_path):
@@ -103,7 +104,7 @@ class NewsDictProcessor:
     # 爬取新闻内容
     def scrape_news_content(self, url, xpath, filiter_text=None, suffix=None):
         """爬取新闻内容"""
-        urls, xpath = self.web_scraper.str_param_to_list(url, xpath)
+        urls, xpath = self.web_scraper.param_list_format(url, xpath)
         self.xpath.append(xpath)
         res = self.web_scraper.scrap_text_by_xpath(urls, self.xpath, filiter_text=filiter_text, merge_results=True)
         return res
@@ -118,19 +119,21 @@ class NewsDictProcessor:
         return res
     
     # 爬取所有的新闻内容
-    def scrape_and_save_all_news_of_domain(self, xpath=None, filiter_text=None, remove_archive=False):
+    def scrape_and_save_all_news_of_domain(self, xpath_dict=None, filiter_text=None, remove_archive=False):
         csv_data = FileUtils.read_csv_from_file(self.csv_path)
         """爬取新闻内容"""
         urls = [data[2] for data in csv_data[1:]]
         # url https://web.archive.org/web/20240322101215/https://news.sina.com.cn/china/ 去掉 https://web.archive.org/web/20240322101215/
         if remove_archive:
             urls = self.web_scraper.remove_archive_prefix(urls)
-        urls, xpath = self.web_scraper.str_param_to_list(urls, xpath)
+        urls = self.web_scraper.param_list_format(urls)
         # 如果xpath为空，则使用默认的xpath
-        if xpath is not None:
+        if xpath_dict is not None:
             # list 合并
-            self.xpath += xpath
-        contents = self.web_scraper.scrap_text_by_xpath(urls, self.xpath, save_path=self.news_content_save_path)
+            self.xpath_dict = xpath_dict
+
+        image_stop_keywords = self.img_stop_keywords
+        contents = self.web_scraper.scrap_text_by_xpath(urls, self.xpath_dict, save_path=self.news_content_save_path,img_stop_keywords=image_stop_keywords)
 
         self.add_csv_column(csv_data, contents,'content')
         self._save_csv(csv_data, self.news_content_save_path)
@@ -153,14 +156,10 @@ class NewsDictProcessor:
 processor = NewsDictProcessor('data/news.sina.com.cn_china__dict.json', 'news.sina.com.cn/china')
 # 将字典转换为CSV
 processor.dict_to_csv()
+# 获取所有新闻的内容
+processor.scrape_and_save_all_news_of_domain()
 # 生成嵌入向量并保存
 processor.generate_embeddings_and_save()
-# 获取所有新闻的内容
-processor.scrape_and_save_all_news_of_domain([
-    '//table[@width="560"]//tr//th', # 标题
-    '//table[@width="560"]//tr//td[@align="center"]', # 时间
-    '//table[@width="560"]//tr//td//p' # 内容
-    ])
 # 计算相似度
 processor.save_related_news_content('小米新闻发布会')
 

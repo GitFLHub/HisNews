@@ -1,3 +1,11 @@
+'''
+Descripttion: 
+version: 
+Author: FengLei
+Date: 2024-04-09 09:59:51
+LastEditors: Please set LastEditors
+LastEditTime: 2024-04-10 11:57:13
+'''
 import os
 import json
 import logging
@@ -82,9 +90,11 @@ class FileUtils:
         logger.info(f"CSV文件已追加至 {file_path}")
 
     @staticmethod
-    def read_csv_from_file(file_path):
+    def read_csv_from_file(file_path, skip_header=True):
         if not os.path.exists(file_path):
             return []
         with open(file_path, 'r', newline='', encoding='utf-8') as file:
             reader = csv.reader(file)
+            if skip_header and reader:
+                next(reader)
             return list(reader)

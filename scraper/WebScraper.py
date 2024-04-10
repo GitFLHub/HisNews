@@ -232,13 +232,19 @@ class WebScraper:
             return ''
 
     # 按行存储，检查行文件是否存在
-    def scrap_text_by_xpath(self, urls, xpaths, save_path=None):
-        urls, xpaths = self.str_param_to_list(urls, xpaths)
+    def scrap_text_by_xpath(self, urls, xpath_dict, save_path=None, with_img=True, img_stop_keywords=[]):
+        # TODO: 删除这段代码
+        urls = self.param_list_format(urls)
         scrap_res = []
         processed_url = [] 
         if save_path and FileUtils.file_exists(save_path):
             saveed_csv_data = FileUtils.read_csv_from_file(save_path)
-            processed_url, _, _, _ = zip(*saveed_csv_data)
+            # 读取第一列数据
+            processed_url = [row[0] for row in saveed_csv_data]
+
+        # 如果文件不存在，创建一个 header 文件，第一列为 URL
+        if save_path and not FileUtils.file_exists(save_path):
+            FileUtils.save_csv_to_file([['URL'] + list(xpath_dict.keys()) + ([] if not with_img else ['image'])], save_path)
 
         batch_size = 12
         # 从 index 开始处理
@@ -250,16 +256,24 @@ class WebScraper:
             if soup is None:
                 continue
             text_list = []
-            for xpath in xpaths:
-                elements = soup.xpath(xpath)
-                text = TextUtils.clean_text(self.extract_text(elements))
-                if not text:
-                    text = ''
-                text_list.append(text)
+            img_list = []
+            # 遍历 xpath_dict
+            for tag, xpaths in xpath_dict.items():
+                item = ''
+                for xpath in xpaths:
+                    elements = soup.xpath(xpath)
+                    text = TextUtils.clean_text(self.extract_text(elements))
+                    # 尝试提取图片链接
+                    if with_img and len(elements) > 0:
+                        img_list += self.extract_imgs(soup, xpath, img_stop_keywords)
+                    if not text:
+                        text = ''
+                    item += text
+                text_list.append(item)
             # 记录 URL 和提取的各个字段 u,标题,时间,正文
-            scrap_res.append([u] + text_list)
+            scrap_res.append([u] + text_list + [';'.join(img_list)])
             # scrap_res.append(text_list.join(' '))
-            if i % batch_size == 0:
+            if (i+1) % batch_size == 0:
                 # 每处理12个链接保存一次数据
                 FileUtils.append_csv_to_file(scrap_res, save_path)
                 scrap_res = []
@@ -268,12 +282,23 @@ class WebScraper:
             FileUtils.append_csv_to_file(scrap_res, save_path)
             scrap_res = []
 
+    def extract_imgs(self, soup, xpath, img_stop_keywords=[]):
+        # 组装 img_xpath 如果 xpath 以 // p 结尾，则替换 p 为 img, 否则添加 //img
+        img_xpath = xpath.replace('//p', '//img') if xpath.endswith('//p') else xpath + '//img'
+        imgs = []
+        elements = soup.xpath(img_xpath)
+        for img in elements:
+            # if img.get('width') and int(img.get('width')) > 50:
+            if not any(word in img.get('src') for word in img_stop_keywords):
+                imgs.append(img.get('src'))
+        return imgs
+
     def load_links_dict_from_json(self):
         return FileUtils.read_json_from_file(self.link_dict_path)
 
     def scrap_link_by_xpath(self, urls, xpaths, filiter_text=[]):
         self.filiter_text.append(filiter_text)
-        urls, xpaths = self.str_param_to_list(urls, xpaths)
+        urls, xpaths = self.param_list_format(urls, xpaths)
         links_dict = self.load_links_dict_from_json()  # 尝试加载已保存的链接字典
         times = 0
         processed_links_batch = []
@@ -297,7 +322,7 @@ class WebScraper:
                                 href = 'https://web.archive.org/web/' + href
                             links_dict[text] = href
                 processed_links_batch.append(u)
-                if times % 5 == 0:
+                if times % 12 == 0:
                     # 每处理12个链接保存一次数据
                     self.write_processed_data(links_dict)
                     self.write_processed_link(processed_links_batch)
@@ -310,15 +335,20 @@ class WebScraper:
             self.write_processed_link(processed_links_batch) 
             processed_links_batch = []
         return links_dict
-
-    def str_param_to_list(self, urls, xpaths):
-        if xpaths is None:
-            xpaths = None
-        if xpaths is not None and isinstance(xpaths, str):
-            xpaths = [xpaths]
-        if isinstance(urls, str):
-            urls = [urls]
-        return urls,xpaths
+    
+    # 如果参数为空，则返回空列表，如果是字符串，则返回列表。返回 tuple,如果 params 只有一个参数，tuple 会被解包
+    def param_list_format(self, *params):
+        res = []
+        for p in params:
+            if p is None:
+                res.append([])
+            if isinstance(p, str):
+                res.append([p])
+            elif isinstance(p, list):
+                res.extend(p)
+        if len(res) == 1:
+            return res[0]
+        return res
     
     def remove_archive_prefix(self, urls):
         # 匹配 任意字符 + '连续 14 位数字/'，分割时间戳以后的部分
@@ -331,6 +361,9 @@ def test():
     url = 'https://www.ron.zone'
     sinaWebScrapper = WebScraper(url)
     xpaths = '//a'
+    urls = sinaWebScrapper.param_list_format([url,url,url,url])
     urls = 'https://web.archive.org/web/20211223055947/https://www.ron.zone'
     links_dict = sinaWebScrapper.scrap_link_by_xpath(urls=urls, xpaths=xpaths)
     print(links_dict)
+
+

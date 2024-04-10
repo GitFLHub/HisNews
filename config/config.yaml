@@ -7,18 +7,23 @@ network:
   max_request_tims: 12
   headers:
     Accept: "*/*"
-    Accept-Encoding: "gzip, deflate, br"
-    Accept-Language: "zh-CN,zh;q=0.9,en-US;q=0.8,en-GB;q=0.7,en;q=0.6"
+    Accept-Encoding: "gzip- deflate- br"
+    Accept-Language: "zh-CN-zh;q=0.9-en-US;q=0.8-en-GB;q=0.7-en;q=0.6"
     Referer: "https://web.archive.org/web/20020501000000*/http://ent.sina.com.cn/star/"
-    User-Agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0"
+    User-Agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML- like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0"
     Sec-Fetch-Dest: "empty"
     Sec-Fetch-Mode: "cors"
     Sec-Fetch-Site: "same-origin"
   cookies:
     donation-identifier: "6816b569e806d4d282d340a73fc6ff3b"
     donation: "x"
+  proxy:
+    ip_pool_host: "1.14.30.152"
+    ip_pool_port: "5010"
+    ip_pool_size: 10
 clash:
   selector: "龙猫云 - TotoroCloud"
+  clash_config_path: "C://Users//dell//.config//clash//config.yaml"
 scraper:
   stop_words:
     - "主页"
@@ -76,5 +81,54 @@ scraper:
     - "滚动"
     - "直播"
     - "VR"
+    - "疫情"
+    - "风险区"
+    - "新冠"
+    - "病例"
+    - "确诊"
+    - "疫苗"
+    - "核酸"
+    - "疾控"
+    - "防控"
+    - "病毒"
+    - "传染"
+    - "隔离"
+    - "封控"
+    - "防疫"
+    - "首\n页"
+    - "邮件" 
+    - "搜索" 
+    - "短信" 
+    - "聊天" 
+    - "回顾" 
+    - "热点" 
+    - "专题" 
+    - "社会" 
+    - "文教" 
+    - "地区"
+    - "论坛"
+    - "sina.com.cn"
+    - "/z/" # 过滤专题
+news:
+  xpath_dict:
+    title:
+      - '//table[@width="560"]//tr//th'
+      - '//div[@data-sudaclick="title"]//h1'
+      - '//h1[@id="artibodyTitle"]'
+    time:
+      - '//table[@width="560"]//tr//td[@align="center"]'
+      - '//*[@id="pub_date"]'
+      - '//span[@id="navtimeSource"]'
+      - '//span[@class="time-source"]'
+    content:
+      - '//table[@width="560"]//tr//td//p'
+      - '//div[@class="zg2-con"]'
+      - '//div[@id="artibody"]'
+  scrap_img: True
+  img_stop_keywords:
+      - 'ad4'
+      - 'newssms'
+      - 'ad/'
+      - 'ad.'
 
 

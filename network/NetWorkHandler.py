@@ -8,6 +8,7 @@ from urllib3.util.retry import Retry
 import yaml
 from lxml import etree
 from network.ProxySwitcher import ProxySwitcher
+from fake_useragent import UserAgent
 
 class NetWorkHandler:
     def __init__(self, config_path='config/config.yaml'):
@@ -15,7 +16,8 @@ class NetWorkHandler:
         self.headers, self.cookies = self.get_request_header()
         self.request_counter = 0
         self.proxySwitcher = ProxySwitcher()
-
+        self.proxy = None
+        self.ua=UserAgent()  
     def get_request_header(self):
         with open(self.config_path, 'r', encoding='utf-8') as file:
             config = yaml.safe_load(file)
@@ -30,8 +32,11 @@ class NetWorkHandler:
         retries = 0
         while retries < max_retries:
             try:
+                proxy = self.proxySwitcher.get_proxy_from_api()
                 time.sleep(random.randint(1, 3))  # 随机延迟，减少被识别的风险
-                response = requests.post(url, headers=self.headers, cookies=self.cookies, params=params, timeout=10)
+                headers={"User-Agent":self.ua.random} 
+                proxies={"http": "http://{}".format(proxy)}
+                response = requests.post(url, headers=self.headers, params=params, cookies=self.cookies, timeout=10, proxies=proxies)
                 if response.status_code == 200:
                     print("请求成功。" + str(params))
                     return response.json()  # 返回响应的JSON数据
@@ -60,20 +65,29 @@ class NetWorkHandler:
             charset = m.group(2).lower()
         return charset
 
-    def get_content_from_url(self, url):
-        self.dynamic_switch()
-        try:
-            response = requests.get(url, headers=self.headers, cookies=self.cookies, timeout=10)  
-            response.encoding = NetWorkHandler.pick_charset(response.text)
-            if response:
-                tree = etree.HTML(response.text)
-                time.sleep(random.randint(1, 3))
-                return tree
-            else:
-                return None
-        except requests.RequestException as e:
-            print(f"Error requesting {url}: {e}")
-            return None
+    def get_content_from_url(self, url, retry_count=5):
+            self.dynamic_switch()
+            try:
+                proxy = self.proxySwitcher.get_proxy_from_api()
+                headers={"User-Agent":self.ua.random} 
+                proxies={"http": "http://{}".format(proxy)}
+                response = requests.get(url, headers=self.headers, cookies=self.cookies, timeout=10, proxies=proxies) 
+                response.encoding = NetWorkHandler.pick_charset(response.text)
+                if response:
+                    tree = etree.HTML(response.text)
+                    return tree
+                else:
+                    return None
+            except requests.RequestException as e:
+                print(f"Error requesting {url}: {e}")
+                if retry_count > 0:
+                    print(f"Retrying... ({retry_count} attempts left)")
+                    # 尝试切换代理
+                    self.proxySwitcher.switch_proxy_auto()
+                    return self.get_content_from_url(url, retry_count - 1)
+                else:
+                    print("Max retry attempts reached. Exiting...")
+                    return None
     @staticmethod
     def get_domian_from_url(url):
         res = ''
