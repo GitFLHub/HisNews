@@ -338,18 +338,13 @@ class WebScraper:
         return links_dict
     
     # 如果参数为空，则返回空列表，如果是字符串，则返回列表。返回 tuple,如果 params 只有一个参数，tuple 会被解包
-    def param_list_format(self, params):
-        res = []
-        for p in params:
-            if p is None:
-                res.append([])
-            if isinstance(p, str):
-                res.append([p])
-            elif isinstance(p, list):
-                res.extend(p)
-        if len(res) == 1:
-            return res[0]
-        return res
+    def param_list_format(self, param):
+        if param is None:
+            return []
+        if isinstance(param, str):
+            return [param]
+        if isinstance(param, list):
+            return param
     
     def remove_archive_prefix(self, urls):
         # 匹配 任意字符 + '连续 14 位数字/'，分割时间戳以后的部分
