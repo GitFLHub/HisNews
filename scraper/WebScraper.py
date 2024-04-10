@@ -298,7 +298,8 @@ class WebScraper:
 
     def scrap_link_by_xpath(self, urls, xpaths, filiter_text=[]):
         self.filiter_text.append(filiter_text)
-        urls, xpaths = self.param_list_format(urls, xpaths)
+        urls = self.param_list_format(urls)
+        xpaths = self.param_list_format(xpaths)
         links_dict = self.load_links_dict_from_json()  # 尝试加载已保存的链接字典
         times = 0
         processed_links_batch = []
@@ -337,7 +338,7 @@ class WebScraper:
         return links_dict
     
     # 如果参数为空，则返回空列表，如果是字符串，则返回列表。返回 tuple,如果 params 只有一个参数，tuple 会被解包
-    def param_list_format(self, *params):
+    def param_list_format(self, params):
         res = []
         for p in params:
             if p is None:
