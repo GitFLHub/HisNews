@@ -4,7 +4,7 @@ version:
 Author: FengLei
 Date: 2024-04-10 13:46:48
 LastEditors: Please set LastEditors
-LastEditTime: 2024-04-11 15:56:39
+LastEditTime: 2024-04-11 17:01:25
 '''
 import yaml
 from utils.CSVUtils import CSVUtils
@@ -102,8 +102,7 @@ class KGDataPreProcessor():
         
 
 if __name__ == '__main__':
-    # KGDataPreProcessor('data\chatchat\chatchat_news_content.csv').clean_news_data(['content', 'title', 'time'])
+    KGDataPreProcessor('data//news.sina.com.cn_china__dict_content_copy.csv').clean_news_data(['content', 'title', 'time'])
     # KGDataPreProcessor('data\kg\chatchat_news_content.csv_cleaned.csv').remove_columns(['URL'])
-    KGDataPreProcessor('data\kg\chatchat_news_content.csv_cleaned.csv').split_data()
-    # AI 在时间轴上带你串历史事件。内容由AI自动生成，不代表本平台立场。如有侵权，请联系删除。
+    # KGDataPreProcessor('data\kg\chatchat_news_content.csv_cleaned.csv').split_data()
         
