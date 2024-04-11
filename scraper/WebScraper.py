@@ -287,15 +287,21 @@ class WebScraper:
         img_xpath = xpath.replace('//p', '//img') if xpath.endswith('//p') else xpath + '//img'
         imgs = []
         elements = soup.xpath(img_xpath)
-        for img in elements:
-            # 如果不存在 src 属性 或者 存在 高度属性且高度小于 50：则跳过
-            if  img.get('src') == None or (img.get('height') != None and int(re.sub("\D", "", img.get('height'))) < 50):
-                continue
-            # if img.get('width') and int(img.get('width')) > 50:
-            if not any(word in img.get('src') for word in img_stop_keywords):
-                imgs.append(img.get('src'))
+        imgs = [img.get('src') for img in elements if self.need_save_img(img, img_stop_keywords)]
         return imgs
-
+    
+    # 判断图片是否需要保存链接
+    def need_save_img(self, img, img_stop_keywords):
+        # 判断是否存在 src 属性，如果不存在，则跳过
+        if img.get('src') == None or any(word in img.get('src') for word in img_stop_keywords):
+            return False
+        # 如果存在高度属性且高度小于 50：则跳过
+        if img.get('height') != None:
+            # 高度像素匹配 可能为 67.98px 或者 67px
+            match = re.search(r'\d+(\.\d+)?', img.get('height'))
+            if match and int(match.group(0)) < 50:
+                return False
+        return True
     def load_links_dict_from_json(self):
         return FileUtils.read_json_from_file(self.link_dict_path)
 
