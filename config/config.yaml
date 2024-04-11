@@ -130,5 +130,6 @@ news:
       - 'newssms'
       - 'ad/'
       - 'ad.'
-
+kgdata_preprocessor:
+  kg_data_path: data//kg//
 

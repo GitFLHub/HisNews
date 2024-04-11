@@ -4,7 +4,7 @@ version:
 Author: FengLei
 Date: 2024-04-09 09:59:51
 LastEditors: Please set LastEditors
-LastEditTime: 2024-04-10 11:57:13
+LastEditTime: 2024-04-10 14:04:52
 '''
 import os
 import json
@@ -90,7 +90,7 @@ class FileUtils:
         logger.info(f"CSV文件已追加至 {file_path}")
 
     @staticmethod
-    def read_csv_from_file(file_path, skip_header=True):
+    def read_csv_from_file_to_list(file_path, skip_header=True):
         if not os.path.exists(file_path):
             return []
         with open(file_path, 'r', newline='', encoding='utf-8') as file:
@@ -98,3 +98,16 @@ class FileUtils:
             if skip_header and reader:
                 next(reader)
             return list(reader)
+
+    # @staticmethod
+    # def read_csv_from_file_to_dict(file_path):
+    #     if not os.path.exists(file_path):
+    #         return {}
+    #     with open(file_path, 'r', newline='', encoding='utf-8') as file:
+    #         reader = csv.DictReader(file)
+    #         # 返回字典
+            
+        
+    @staticmethod
+    def get_filename_from_path(file_path):
+        return os.path.basename(file_path)

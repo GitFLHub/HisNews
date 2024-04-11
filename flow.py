@@ -4,7 +4,7 @@ version:
 Author: FengLei
 Date: 2024-04-09 09:59:51
 LastEditors: Please set LastEditors
-LastEditTime: 2024-04-09 13:10:47
+LastEditTime: 2024-04-10 13:33:51
 '''
 
 from archive.ArchiveHandler import ArchiveHandler
@@ -23,8 +23,8 @@ def main():
     fliter_text = ['XXXX']
     links_dict = sinaWebScrapper.scrap_link_by_xpath(urls, xpath, filiter_text=fliter_text)
     file_path = FileUtils.remove_file_extension(file_path)
-    a_file_path = f'{file_path}_a_links.json'
-    FileUtils.save_json_to_file(links_dict, a_file_path)
+    # a_file_path = f'{file_path}_a_links.json'
+    # FileUtils.save_json_to_file(links_dict, a_file_path)
 
 
 if __name__ == '__main__':

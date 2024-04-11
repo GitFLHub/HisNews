@@ -64,7 +64,7 @@ class NewsDictProcessor:
             return
         if not FileUtils.file_exists(self.csv_path):
             self.dict_to_csv()
-        csv_data = FileUtils.read_csv_from_file(self.csv_path)
+        csv_data = FileUtils.read_csv_from_file_to_list(self.csv_path)
         titles = csv_data[1:]
         titles_embedding = TextUtils.batch_embedding_text_by_sentence_transformer([title for _, title, _ in titles])
         embeddings_list = [embedding.tolist() for embedding in titles_embedding]
@@ -84,7 +84,7 @@ class NewsDictProcessor:
         if not os.path.exists(self.embedding_csv_path):
             logger.error(f"嵌入向量文件 {self.embedding_csv_path} 不存在，请先调用 generate_embeddings_and_save 方法生成")
             return
-        csv_data = FileUtils.read_csv_from_file(self.embedding_csv_path)
+        csv_data = FileUtils.read_csv_from_file_to_list(self.embedding_csv_path)
         titles_embedding = [TorchUtils.convert_to_array(embedding) for _, _, _, embedding in csv_data[1:]]
         input_embedding = TextUtils.embedding_text_by_sentence_transformer(text)
         cosine_similarity = TextUtils.calculate_cosine_similarity_batch(input_embedding, titles_embedding)
@@ -94,7 +94,7 @@ class NewsDictProcessor:
     def get_most_similar_news(self, text: str, n=10):
         """获取与输入文本相关性最高的新闻标题和链接"""
         sorted_index = self.calculate_similarity(text)
-        csv_data = FileUtils.read_csv_from_file(self.csv_path)
+        csv_data = FileUtils.read_csv_from_file_to_list(self.csv_path)
         csv_data = csv_data[1:]
         result = []
         for idx in sorted_index[:n]:
@@ -120,7 +120,7 @@ class NewsDictProcessor:
     
     # 爬取所有的新闻内容
     def scrape_and_save_all_news_of_domain(self, xpath_dict=None, filiter_text=None, remove_archive=False):
-        csv_data = FileUtils.read_csv_from_file(self.csv_path)
+        csv_data = FileUtils.read_csv_from_file_to_list(self.csv_path)
         """爬取新闻内容"""
         urls = [data[2] for data in csv_data[1:]]
         # url https://web.archive.org/web/20240322101215/https://news.sina.com.cn/china/ 去掉 https://web.archive.org/web/20240322101215/

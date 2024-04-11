@@ -28,7 +28,7 @@ def main():
 
     # 读取 csv 文件，生成标题的embedding
     # 1. 读取csv文件
-    csv_data = FileUtils.read_csv_from_file(csv_path)
+    csv_data = FileUtils.read_csv_from_file_to_list(csv_path)
     # 2. 生成标题的embedding
     titles = csv_data[1:]  # 去掉标题行
 

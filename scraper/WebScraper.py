@@ -238,7 +238,7 @@ class WebScraper:
         scrap_res = []
         processed_url = [] 
         if save_path and FileUtils.file_exists(save_path):
-            saveed_csv_data = FileUtils.read_csv_from_file(save_path)
+            saveed_csv_data = FileUtils.read_csv_from_file_to_list(save_path)
             # 读取第一列数据
             processed_url = [row[0] for row in saveed_csv_data]
 
@@ -288,6 +288,9 @@ class WebScraper:
         imgs = []
         elements = soup.xpath(img_xpath)
         for img in elements:
+            # 如果不存在 src 属性 或者 存在 高度属性且高度小于 50：则跳过
+            if not img.get('src') or (img.get('height') and int(img.get('height'))) < 50:
+                continue
             # if img.get('width') and int(img.get('width')) > 50:
             if not any(word in img.get('src') for word in img_stop_keywords):
                 imgs.append(img.get('src'))
