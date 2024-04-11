@@ -4,3 +4,4 @@ plm/all-MiniLM-L6-v2/
 *.embedding.csv
 data/
 *test
+*.pyc

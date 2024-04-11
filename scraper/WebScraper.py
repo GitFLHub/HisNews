@@ -289,7 +289,7 @@ class WebScraper:
         elements = soup.xpath(img_xpath)
         for img in elements:
             # 如果不存在 src 属性 或者 存在 高度属性且高度小于 50：则跳过
-            if not img.get('src') or (img.get('height') and int(img.get('height'))) < 50:
+            if  img.get('src') == None or (img.get('height') != None and int(img.get('height'))) < 50:
                 continue
             # if img.get('width') and int(img.get('width')) > 50:
             if not any(word in img.get('src') for word in img_stop_keywords):
