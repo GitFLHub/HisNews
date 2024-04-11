@@ -132,4 +132,4 @@ news:
       - 'ad.'
 kgdata_preprocessor:
   kg_data_path: data//kg//
-
+  kg_split_path: data//split//
