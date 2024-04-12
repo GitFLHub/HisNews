@@ -254,6 +254,8 @@ class WebScraper:
             u = urls[i]
             soup = self.netWorkHandler.get_content_from_url(u)
             if soup is None:
+                # 添加空行
+                
                 continue
             text_list = []
             img_list = []
