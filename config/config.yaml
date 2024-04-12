@@ -115,15 +115,18 @@ news:
       - '//table[@width="560"]//tr//th'
       - '//div[@data-sudaclick="title"]//h1'
       - '//h1[@id="artibodyTitle"]'
+      - '//h1[@class="main-title"]'
     time:
       - '//table[@width="560"]//tr//td[@align="center"]'
       - '//*[@id="pub_date"]'
       - '//span[@id="navtimeSource"]'
       - '//span[@class="time-source"]'
+      - '//div[@class="date-source"]'
     content:
       - '//table[@width="560"]//tr//td//p'
       - '//div[@class="zg2-con"]'
       - '//div[@id="artibody"]'
+      - '//div[@class="article"]//p'
   scrap_img: True
   img_stop_keywords:
       - 'ad4'
