@@ -255,7 +255,7 @@ class WebScraper:
             soup = self.netWorkHandler.get_content_from_url(u)
             if soup is None:
                 # 添加空行
-                
+                scrap_res.append([u] + [''] * len(xpath_dict) + [''])
                 continue
             text_list = []
             img_list = []
