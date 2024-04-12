@@ -299,7 +299,7 @@ class WebScraper:
         if img.get('height') != None:
             # 高度像素匹配 可能为 67.98px 或者 67px
             match = re.search(r'\d+(\.\d+)?', img.get('height'))
-            if match and int(match.group(0)) < 50:
+            if match and int(match.group()) < 50:
                 return False
         return True
     def load_links_dict_from_json(self):
