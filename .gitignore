@@ -5,4 +5,4 @@ plm/all-MiniLM-L6-v2/
 data/
 *test
 *.pyc
-*.__pycache__
+*__pycache__/

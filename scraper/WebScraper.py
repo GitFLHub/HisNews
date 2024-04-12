@@ -365,12 +365,22 @@ class WebScraper:
         return urls
 
 def test():
-    url = 'https://www.ron.zone'
-    sinaWebScrapper = WebScraper(url)
-    xpaths = '//a'
-    urls = sinaWebScrapper.param_list_format([url,url,url,url])
-    urls = 'https://web.archive.org/web/20211223055947/https://www.ron.zone'
-    links_dict = sinaWebScrapper.scrap_link_by_xpath(urls=urls, xpaths=xpaths)
+    url1 = 'https://web.archive.org/web/20180305154649/http://news.sina.com.cn/o/2018-03-05/doc-ifyrztfz8616083.shtml'
+    url2 = 'https://web.archive.org/web/20180111065834/http://news.sina.com.cn/c/nd/2018-01-11/doc-ifyqnick5207416.shtml'
+    url3 = 'https://web.archive.org/web/20180111065834/http://news.sina.com.cn/c/gat/2018-01-11/doc-ifyqqieu5713403.shtml'
+    url4 = 'https://web.archive.org/web/20180130192503/http://news.sina.com.cn/c/nd/2018-01-31/doc-ifyqyqni5646905.shtml'
+    sinaWebScrapper = WebScraper(url1)
+    xpath_dict = {
+        'title': ['//h1[@class="main-title"]'],
+        'time': ['//div[@class="date-source"]'],
+        'content': ['//div[@class="article"]//p']
+    }
+    urls = sinaWebScrapper.param_list_format([url1, url2, url3, url4])
+    # urls = 'https://web.archive.org/web/20211223055947/https://www.ron.zone'
+    links_dict = sinaWebScrapper.scrap_text_by_xpath(urls=urls, xpath_dict=xpath_dict, save_path='./data/sina_news_text.csv', with_img=True, img_stop_keywords=['logo', 'icon'])
     print(links_dict)
+
+# if __name__ == '__main__':
+#     test()
 
 
